@@ -1,17 +1,15 @@
 'use strict'
 
+const utils = require('./utils.js')
+
 module.exports = function(context) {
   return {
-    CallExpression: function(node) {
-      if (node.callee.type !== 'MemberExpression') return
-      if (node.callee.object.name !== '$') return
-      if (node.callee.property.name !== 'globalEval') return
-
+    CallExpression: utils.withProperty('globalEval', function(node) {
       context.report({
         node: node,
         message: '$.globalEval is not allowed'
       })
-    }
+    })
   }
 }
 

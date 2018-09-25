@@ -33,7 +33,41 @@ function isjQuery(node) {
   return id && id.name.startsWith('$')
 }
 
+function withProperty(property, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError('Must provide callback function')
+  }
+
+  const properties = new Set([].concat(property))
+
+  return function(node) {
+    if (node.callee.type !== 'MemberExpression') return
+    if (node.callee.object.name !== '$') return
+    if (!properties.has(node.callee.property.name)) return
+
+    callback(node)
+  }
+}
+
+function withMethod(method, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError('Must provide callback function')
+  }
+
+  const methods = new Set([].concat(method))
+
+  return function(node) {
+    if (node.callee.type !== 'MemberExpression') return
+    if (!methods.has(node.callee.property.name)) return
+    if (isjQuery(node)) {
+      callback(node)
+    }
+  }
+}
+
 module.exports = {
   traverse: traverse,
-  isjQuery: isjQuery
+  isjQuery: isjQuery,
+  withMethod: withMethod,
+  withProperty: withProperty
 }
